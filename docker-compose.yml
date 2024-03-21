@@ -1,0 +1,80 @@
+# version: '3'
+# services:
+#   server:
+#     build: .
+#     ports:
+#       - "4000:4000"
+#     depends_on:
+#       - mysql
+#       - redis
+#   mysql:
+#     image: mysql:latest
+#     environment:
+#       MYSQL_ROOT_PASSWORD: Salman12@
+#       MYSQL_DATABASE: loadtesting
+#     ports:
+#       - "33066:3306"
+#   redis:
+#     image: redis:latest
+#     ports:
+#       - "6379:6379"
+
+
+version: '3.7'
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    hostname: mysql
+    restart: always
+    env_file:
+      - app.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: Salman12@
+        MYSQL_DATABASE: loadtesting
+    networks:
+      - backend
+
+  redis:
+    image: redis:7.0.10
+    container_name: redis
+    restart: always
+    env_file:
+      - app.env
+    ports:
+      - "6379:6379"
+    volumes:
+      - rediscache:/data
+    networks:
+      - backend
+
+  api_server:
+    build: 
+     context: .
+    container_name: demo
+    # restart: on-failure:5
+    ports:
+      - 4000:4000
+    env_file:
+      - app.env
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - backend
+    links:
+      - mysql
+      - redis
+         
+networks:
+  backend:
+   driver: bridge
+
+volumes:
+  mysql_data:
+  rediscache:
+   
